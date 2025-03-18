@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Hierarchiczna scena</title>
+    <script>
+        var canvas;
+var graphics;
+var frameNumber = 0;
+
+function init() {
+    canvas = document.getElementById("thecanvas");
+    if (!canvas.getContext) {
+        document.getElementById("message").innerHTML = "ERROR: Canvas not supported";
+        return;
+    }
+    graphics = canvas.getContext("2d");
+    document.getElementById("animateCheck").checked = false; 
+    document.getElementById("animateCheck").onchange = doAnimationCheckbox; 
+    draw();
+}
+
+function draw() {
+    graphics.clearRect(0, 0, canvas.width, canvas.height);
+    graphics.save();
+    
+    drawSeesaw(200, 300, 100, "blue");
+    drawSeesaw(400, 200, 60, "green");
+    drawSeesaw(600, 350, 80, "purple");
+    
+    graphics.restore();
+}
+
+function drawSeesaw(x, y, size, color) {
+    graphics.save();
+    graphics.translate(x, y);
+    drawBase(size, color);
+    drawBeam(size * 1.5, size);
+    graphics.restore();
+}
+
+function drawBase(size, color) {
+    graphics.fillStyle = color;
+    graphics.beginPath();
+    graphics.moveTo(-size / 4, 0);
+    graphics.lineTo(size / 4, 0);
+    graphics.lineTo(0, -size);
+    graphics.closePath();
+    graphics.fill();
+}
+
+function drawBeam(length, size) {
+    graphics.fillStyle = "red";
+    graphics.save();
+    let angle = Math.sin(frameNumber * 0.05) * 0.3;
+    graphics.translate(0, -size);
+    graphics.rotate(angle);
+    graphics.fillRect(-length / 2, -5, length, 10);
+    
+    drawPolygon(-length / 2, 0, size * 0.4, 16, angle);
+    drawPolygon(length / 2, 0, size * 0.4, 16, angle);
+    
+    graphics.restore();
+}
+
+function drawPolygon(x, y, radius, sides, angle) {
+    graphics.save();
+    graphics.translate(x, y);
+    graphics.rotate(frameNumber * 0.05 + angle);
+    graphics.beginPath();
+    for (let i = 0; i < sides; i++) {
+        let a = (i / sides) * 2 * Math.PI;
+        let px = Math.cos(a) * radius;
+        let py = Math.sin(a) * radius;
+        if (i === 0) {
+            graphics.moveTo(px, py);
+        } else {
+            graphics.lineTo(px, py);
+        }
+    }
+    graphics.closePath();
+    graphics.stroke();
+    graphics.restore();
+}
+
+function updateFrame() {
+    frameNumber++;
+}
+
+var running = false;
+function frame() {
+    if (running) {
+        updateFrame();
+        draw();
+        requestAnimationFrame(frame);
+    }
+}
+
+function doAnimationCheckbox() { 
+    var shouldRun = document.getElementById("animateCheck").checked;
+    if (shouldRun !== running) {
+        running = shouldRun;
+        if (running) requestAnimationFrame(frame);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", init);
+
+    </script>
+</head>
+<body>
+    <h3>Animowana scena</h3>
+    <canvas id="thecanvas" width="800" height="600" style="border:1px solid black;"></canvas>
+    <p id="message">
+        <label><input type="checkbox" id="animateCheck"><b>Uruchom animację</b></label>
+    </p>
+</body>
+</html>
