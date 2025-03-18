@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Hexagons</title>
+    <style>
+        canvas {
+            border: 2px solid black;
+            background-color: white;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <br>
+    <label>Wybierz kolor: </label>
+    <input type="color" id="colorPicker" value="#000000">
+    <button id="clearBtn">Wyczyść ekran</button>
+    
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const colorPicker = document.getElementById("colorPicker");
+        const clearBtn = document.getElementById("clearBtn");
+        let isDrawing = false;
+
+        function drawHexagon(x, y, size, color) {
+            ctx.beginPath();
+            for (let i = 0; i < 16; i++) {
+                const angle = (i * Math.PI) / 8;
+                const xOffset = x + size * Math.cos(angle);
+                const yOffset = y + size * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(xOffset, yOffset);
+                } else {
+                    ctx.lineTo(xOffset, yOffset);
+                }
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        canvas.addEventListener("mousedown", (event) => {
+            if (event.button !== 0) return; 
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            drawHexagon(x, y, 30, colorPicker.value);
+        });
+
+        canvas.addEventListener("mouseup", () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener("mousemove", (event) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            drawHexagon(x, y, 30, colorPicker.value);
+        });
+
+        clearBtn.addEventListener("click", () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+    </script>
+</body>
+</html>
